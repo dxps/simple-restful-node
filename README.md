@@ -14,4 +14,6 @@ This is a standard implementation of a RESTful API, based on Node.js with Expres
 
 ### Usage
 
-As an example using [Postman](https://www.getpostman.com/) as a standalone (free) app or Chrome extension, 
+As an example, using <a href="https://www.getpostman.com/" target="_blank">Postman</a> as a standalone (free) app or Chrome extension you will get a result like this:
+
+![Postman example](https://raw.githubusercontent.com/visvadw/simple-restful-node/master/_notes/postman-req-res-example.png)
