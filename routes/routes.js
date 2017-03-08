@@ -1,34 +1,54 @@
-var productCatalog = require("../catalog/catalog.js");
+let productCatalog = require("../catalog/catalog.js");
+let standardErrorMessage = require("./standard-error");
 
-var appRouter = function(app) {
+let appRouter = function(app) {
 
-app.get("/product-catalog", function(req, res) {
+app.get("/", function (req, res) {
+    return standardErrorMessage(res);
+});
 
-    var productCatalogMock = {
-        "1": [
-            { "id": "1", "name": { "en": "Product 1.1", "ro": "Produsul 1.1" }},
-            { "id": "2", "name": { "en": "Product 1.2", "ro": "Produsul 1.2" }}
-        ],
-        "2": [
-            { "id": "1", "name": { "en": "Product 2.1", "ro": "Produsul 2.1" }},
-            { "id": "2", "name": { "en": "Product 2.2", "ro": "Produsul 2.2" }}
-        ]
-    };
+app.get("/product-catalog", function (req, res) {
+    return standardErrorMessage(res);
+});
 
-    var categoryId = req.query.categoryId;
-    if(!categoryId) {
-        return res.send({"status": "error", "message": "Missing categoryId"});
+app.post("/product-catalog", function (req, res) {
+
+    /* Handling the request, knowing that the body should look like this:
+       {
+          "language": "en",
+          "filter": [
+             { "categoryId": "1", "productIds": [ "1", "2" ] }
+          ]
+       }
+    */
+
+    let language = req.body.language;
+
+    if (!language) {
+        return res.send({"status": "error", "message": "'language' is not provided in the body of the request."});
+    }
+    if (!req.body.filter) {
+        return res.send({"status": "error", "message": "'filter' is not provided in the body of the request."});
     }
 
-    //var category = productCatalogMock[categoryId];
-    var category = productCatalog[categoryId];
+    let result = [];
+    req.body.filter.map( filterEntry => {
+        let categoryId = filterEntry.categoryId;
+        let category = productCatalog[categoryId];
+        let productIds = filterEntry.productIds;
+        if (!category) return;
+        let resultPart = { "categoryId": categoryId, "products": [] };
+        productIds.map( productId => {
+           category.map( product => {
+             if (product.id === productId) {
+                resultPart.products.push({ "productId": productId, "label": product.label[language]});
+             }
+          });
+        });
+        result.push(resultPart);
+    });
 
-    if(!category) {
-            return res.send({"status": "error", "message": "Unknown categoryId"});
-    }
-    else {
-            return res.send(category);
-    }
+    return res.send(result);
 });
 
 };
